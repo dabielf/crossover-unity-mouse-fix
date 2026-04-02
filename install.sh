@@ -27,7 +27,7 @@ if [ ! -d "$BIN_DIR" ]; then
 fi
 
 # Check that CrossOver is not running
-if pgrep -f "CrossOver" > /dev/null 2>&1 || pgrep -f "wine" > /dev/null 2>&1; then
+if pgrep -x "CrossOver" > /dev/null 2>&1 || pgrep -f "wineserver" > /dev/null 2>&1; then
     echo "ERROR: CrossOver or Wine processes are still running."
     echo "Please quit CrossOver completely before installing."
     echo ""
@@ -43,13 +43,27 @@ if [ ! -d "$WINE_LIB/x86_64-windows" ] || [ ! -d "$WINE_LIB/x86_64-unix" ]; then
     exit 1
 fi
 
+# Confirmation
+echo ""
+echo "This will patch the following files in CrossOver.app:"
+echo "  - x86_64-windows/win32u.dll (replaced)"
+echo "  - x86_64-unix/win32u.so (replaced)"
+echo "  - x86_64-windows/user32.dll (added)"
+echo ""
+read -p "Proceed? [y/N] " confirm
+if [[ ! "$confirm" =~ ^[yY]$ ]]; then
+    echo "Aborted."
+    exit 0
+fi
+
 # Backup originals
 BACKUP_DIR="$HOME/Desktop/crossover-unity-mouse-fix-backup"
 if [ ! -d "$BACKUP_DIR" ]; then
     echo "Backing up original files to $BACKUP_DIR..."
     mkdir -p "$BACKUP_DIR"
-    cp "$WINE_LIB/x86_64-windows/win32u.dll" "$BACKUP_DIR/" 2>/dev/null || true
-    cp "$WINE_LIB/x86_64-unix/win32u.so" "$BACKUP_DIR/" 2>/dev/null || true
+    # win32u.dll and win32u.so must exist in stock — fail if they don't
+    cp "$WINE_LIB/x86_64-windows/win32u.dll" "$BACKUP_DIR/"
+    cp "$WINE_LIB/x86_64-unix/win32u.so" "$BACKUP_DIR/"
     # user32.dll may not exist in stock — that's expected
     cp "$WINE_LIB/x86_64-windows/user32.dll" "$BACKUP_DIR/" 2>/dev/null || true
     echo "  Backup saved."
@@ -66,6 +80,7 @@ echo "  3 files installed."
 
 # Verify
 echo "Verifying..."
+VERIFY_FAILED=0
 if [ -f "$BIN_DIR/SHA256SUMS" ]; then
     cd "$WINE_LIB"
     while IFS='  ' read -r expected_hash filepath; do
@@ -76,11 +91,19 @@ if [ -f "$BIN_DIR/SHA256SUMS" ]; then
             echo "  MISMATCH: $filepath"
             echo "    expected: $expected_hash"
             echo "    actual:   $actual_hash"
+            VERIFY_FAILED=1
         fi
     done < "$BIN_DIR/SHA256SUMS"
     cd "$SCRIPT_DIR"
 else
     echo "  (no SHA256SUMS file — skipping verification)"
+fi
+
+if [ "$VERIFY_FAILED" -eq 1 ]; then
+    echo ""
+    echo "ERROR: Verification failed. Files may be corrupt."
+    echo "Run ./uninstall.sh to restore originals."
+    exit 1
 fi
 
 # Re-sign

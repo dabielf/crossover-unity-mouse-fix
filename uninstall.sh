@@ -15,10 +15,17 @@ if [ ! -d "$BACKUP_DIR" ]; then
 fi
 
 # Check that CrossOver is not running
-if pgrep -f "CrossOver" > /dev/null 2>&1 || pgrep -f "wine" > /dev/null 2>&1; then
+if pgrep -x "CrossOver" > /dev/null 2>&1 || pgrep -f "wineserver" > /dev/null 2>&1; then
     echo "ERROR: CrossOver or Wine processes are still running."
     echo "Please quit CrossOver completely before uninstalling."
     exit 1
+fi
+
+echo ""
+read -p "Restore original CrossOver files from backup? [y/N] " confirm
+if [[ ! "$confirm" =~ ^[yY]$ ]]; then
+    echo "Aborted."
+    exit 0
 fi
 
 echo "Restoring original files from $BACKUP_DIR..."
