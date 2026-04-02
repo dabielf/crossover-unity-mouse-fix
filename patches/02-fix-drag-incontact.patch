@@ -1,0 +1,13 @@
+--- a/dlls/win32u/message.c
++++ b/dlls/win32u/message.c
+@@ -1,7 +1,16 @@
+         case WM_MOUSEMOVE:
+             message = WM_POINTERUPDATE;
+             info->pointerFlags |= POINTER_MESSAGE_FLAG_INRANGE;
++            if (msg->wParam & MK_LBUTTON)
++                info->pointerFlags |= POINTER_MESSAGE_FLAG_INCONTACT | POINTER_MESSAGE_FLAG_FIRSTBUTTON;
++            if (msg->wParam & MK_RBUTTON)
++                info->pointerFlags |= POINTER_MESSAGE_FLAG_INCONTACT | POINTER_MESSAGE_FLAG_SECONDBUTTON;
++            if (msg->wParam & MK_MBUTTON)
++                info->pointerFlags |= POINTER_MESSAGE_FLAG_INCONTACT | POINTER_MESSAGE_FLAG_THIRDBUTTON;
+             break;
