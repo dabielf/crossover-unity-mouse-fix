@@ -57,6 +57,7 @@ If you use an AI coding assistant (Claude Code, Cursor, etc.), point it at [`PRO
 - Loopler
 - Sritchy Scratchy
 - Vampire Crawlers Demo
+- Everything Is Crab Demo
 - Should work with any Unity game using `EnableMouseInPointer`
 
 ## How It Works
