@@ -47,10 +47,16 @@ The installer will:
 
 Restores the original files from backup and re-signs the app.
 
+## AI-Assisted Install
+
+If you use an AI coding assistant (Claude Code, Cursor, etc.), point it at [`PROMPT.md`](PROMPT.md) for step-by-step installation instructions it can follow directly.
+
 ## Tested Games
 
 - Magicraft
 - Loopler
+- Sritchy Scratchy
+- Vampire Crawlers Demo
 - Should work with any Unity game using `EnableMouseInPointer`
 
 ## How It Works
